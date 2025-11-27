@@ -11,34 +11,50 @@
     padding: 0px 16px;
 }
 
+#txt2img_extra_tabs > .tab-nav > button:nth-child(2),
+#txt2img_extra_tabs > .tab-nav > button:nth-child(3),
+#txt2img_extra_tabs > .tab-nav > button:nth-child(4) {
+    display: none;
+}
+
+#txt2img_results {
+    margin: 0 !important;
+}
+
+#txt2img_lora_cards > .card {
+    height: 4rem;
+    margin: 0 !important;
+    font-size: 50% !important;
+}
 
 #quicksettings, 
 #txt2img_tools, 
-#txt2img_styles_edit_button, 
 .extra-networks-controls-div {
     display: none;
 }
 
 /* Negaボタンで切り替え */
-.nega-hidden #txt2img_neg_prompt_row, 
-.nega-hidden #txt2img_styles {
+.nega-hidden #txt2img_prompt_container > div:last-child,
+.nega-hidden #txt2img_actions_column {
     display: none;
 }
 
-
-#txt2img_sampling,
-#txt2img_scheduler,
-#txt2img_steps {
+/* Sampleボタンで切り替え */
+.sample-hidden #sampler_selection_txt2img {
     display: none;
 }
 
-.size-hidden #txt2img_column_size {
+/* Sizeボタンで切り替え */
+.size-hidden #txt2img_column_size,
+.size-hidden #txt2img_dimensions_row {
     display: none;
 }
 
-#txt2img_hr,
-#txt2img_enable,
-#txt2img_dimensions_row,
+#txt2img_prompt textarea {
+    height: 12rem !important;
+}
+
+#txt2img_accordions,
 #txt2img_column_batch {
     display: none;
 }
@@ -49,7 +65,7 @@
 #txt2img_override_settings_row {
     display: none;
 }
+
 #txt2img_script_container {
     display: none;
 }
-

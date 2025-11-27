@@ -10,6 +10,10 @@ function insertPanel() {
     _insertButton(panel, "Nega", "nagetive-prompt-toggle-button", "operator", e => {
         document.getElementById('tabs').classList.toggle("nega-hidden");
     });
+    // Sampleボタンの追加
+    _insertButton(panel, "Sample", "sample-toggle-button", "operator", e => {
+        document.getElementById('tabs').classList.toggle("sample-hidden");
+    });
     // Sizeボタンの追加
     _insertButton(panel, "Size", "size-toggle-button", "operator", e => {
         document.getElementById('tabs').classList.toggle("size-hidden");
@@ -49,7 +53,7 @@ function _toggleResponsiveCSS() {
         document.head.appendChild(link);
 
         // Negaボタンの初期状態設定
-        document.getElementById('tabs').classList.add("nega-hidden", "size-hidden");
+        document.getElementById('tabs').classList.add("nega-hidden", "size-hidden", "sample-hidden");
 
         return true
     } else {

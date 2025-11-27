@@ -17,8 +17,8 @@
 #responsive-design-inject-panel > button {
     pointer-events: auto;
     position: relative;
-    padding: 0.5rem 1rem;
-    margin: 0.5rem;
+    padding: 0.2rem 1rem;
+    margin: 0.1rem;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -29,7 +29,6 @@
 #responsive-design-inject-panel > .operator {
     display: none;
 }
-
 #responsive-design-inject-panel.opened > .operator {
     display: flex;
 }
@@ -38,8 +37,8 @@
     background-image: url('./svg/power.svg');
     background-repeat: no-repeat;
     background-size: contain;
-    width: 2rem;
-    height: 2rem;
+    width: 1.6rem;
+    height: 1.6rem;
 }
 
 .opened > #responsive-design-inject-button {
