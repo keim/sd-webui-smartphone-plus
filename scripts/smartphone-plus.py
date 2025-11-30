@@ -20,6 +20,11 @@ def on_ui_tabs():
     <button id="sspp-size" class="operator">
         <span class="sspp-button-label">Size</span>
     </button>
+    <div id="sspp-size-selector" class="selector">
+        <button class="selector-item" onclick="sspp_setSize(1440, 1080)">1440x1080</button>
+        <button class="selector-item" onclick="sspp_setSize(1280, 1280)">1280x1280</button>
+        <button class="selector-item" onclick="sspp_setSize(1080, 1440)">1080x1440</button>
+    </div>
 </div>
         """)
         

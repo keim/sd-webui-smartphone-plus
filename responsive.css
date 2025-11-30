@@ -49,8 +49,12 @@
     height: 1.6rem;
 }
 
-#img2img_image {
-    max-height:40remm !important;
+#img2img_image,
+#img2img_sketch,
+#img2maskimg, 
+#inpaint_sketch {
+    height: auto !important;
+    aspect-ratio: 1 / 1;
     object-fit: contain;
 }
 
@@ -66,7 +70,7 @@
 }
 
 .nega-prompt-hidden #sspp-nega-prompt {
-    background-color: #fff !important;
+    background-color: #ccc !important;
 }
 .nega-prompt-hidden #txt2img_neg_prompt_row,
 .nega-prompt-hidden #txt2img_actions_column, 
@@ -76,7 +80,7 @@
 }
 
 .config-hidden #sspp-config {
-    background-color: #fff !important;
+    background-color: #ccc !important;
 }
 .config-hidden #txt2img_seed_row,
 .config-hidden #txt2img_seed_extras,
@@ -106,6 +110,10 @@
 .config-hidden #img2img_script_container {
     display: none;
 }
-.size-hidden #sspp-size {
-    background-color: #fff !important;
+.size-select #sspp-size {
+    background-color: #ccc !important;
 }
+.size-select #sspp-size-selector {
+    display: flex !important;
+}
+
