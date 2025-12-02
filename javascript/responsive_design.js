@@ -50,8 +50,26 @@ function insertPanel() {
     });
     t2i.appendChild(helper);
     
-
+    _insertInteractiveWidget();
+    
     console.log("Responsive design CSS injector has been loaded.");
+}
+
+
+function _insertInteractiveWidget() {
+    // 1. viewportのmetaタグを取得
+    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    
+    if (viewportMeta) {
+      // 2. 現在のcontent属性の値を取得
+      let content = viewportMeta.getAttribute('content');
+    
+      // 3. まだ設定が含まれていない場合のみ追加（重複防止）
+      if (!content.includes('interactive-widget')) {
+        // コンマ区切りで追加
+        viewportMeta.setAttribute('content', content + ', interactive-widget=resizes-content');
+      }
+    }
 }
 
 
@@ -178,7 +196,6 @@ function _sspp_emphasize(textArea) {
     textArea.dispatchEvent(new Event('input', { bubbles: true }));
     textArea.setSelectionRange(newBefore.length, newBefore.length + newContent.length);
 }
-
 
 
 // CSSのインジェクション/解除を切り替える
