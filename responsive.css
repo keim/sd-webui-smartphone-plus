@@ -127,6 +127,16 @@
 .size-select #sspp-size-selector {
     display: flex !important;
 }
+.clip-select #sspp-clip {
+    background-color: #ccc !important;
+}
+.clip-select #sspp-clip-selector {
+    display: flex !important;
+}
+
 .word-select #sspp-currword {
     background-color: #ccc !important;
 }
+
+
+

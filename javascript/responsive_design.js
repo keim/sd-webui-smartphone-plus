@@ -1,130 +1,147 @@
 // 画面上部のInjectパネルの表示/非表示を切り替える
 function insertPanel() {
-    const panel = document.getElementById('sd-smartphone-plus-panel');
-    const root = document.getElementById('tabs').parentNode;
-
-    _setOnClick('sspp-inject-css', () => {
-        root.classList.toggle('sspp-opened', _toggleResponsiveCSS());
-    })
-    // Negaボタンの追加
-    _setOnClick('sspp-nega-prompt', e => {
-        root.classList.toggle("nega-prompt-hidden");
-    });
-    // Configボタンの追加
-    _setOnClick('sspp-config', e => {
-        root.classList.toggle("config-hidden");
-    });
-    // Sizeボタンの追加
-    _setOnClick('sspp-size', e => {
-        panel.classList.toggle("size-select");
-    });
-    sspp_updateSizeDisplay();
-    root.appendChild(panel);
-    root.classList.add('config-hidden', 'nega-prompt-hidden');
-
-
-    const helper = document.getElementById('sd-smartphone-plus-prompt-helper');
-    const t2i = document.getElementById('txt2img_prompt_container');
-    _setOnClick('sspp-generate', e => {
-        const generateButton = document.getElementById('txt2img_generate');
-        generateButton.click();
-    })
-    _setOnClick('sspp-prevword', e => {
-        _sspp_selectPrevWord(_promptTextArea(), helper.classList.contains("word-select"))
-    });
-    _setOnClick('sspp-currword', e => {
-        sspp_selectWord(panel.classList.contains("word-select"));
-        helper.classList.toggle("word-select");
-    });
-    _setOnClick('sspp-nextword', e => {
-        _sspp_selectNextWord(_promptTextArea(), helper.classList.contains("word-select"))
-    });
-    _setOnClick('sspp-parentheses', e => {
-        _sspp_emphasize(_promptTextArea());
-    });
-    _setOnClick('sspp-ratedown', e => {
-        _sspp_changerate(_promptTextArea(), -0.05);
-    });
-    _setOnClick('sspp-rateup', e => {
-        _sspp_changerate(_promptTextArea(), +0.05);
-    });
-    t2i.appendChild(helper);
-    
+    _setupMenuButtons();
     _insertInteractiveWidget();
-    
+    _addEventListener();
+    _sspp_updateSizeDisplay();
     console.log("Responsive design CSS injector has been loaded.");
 }
 
+function _setupMenuButtons() {
+    const panel = document.getElementById('sd-smartphone-plus-panel');
+    const root = document.getElementById('tabs').parentNode;
+    
+    // CSS Injection ボタン
+    _setOnClick('sspp-inject-css', () => {
+        root.classList.toggle('sspp-opened', _toggleResponsiveCSS());
+    });
+    
+    // [Negative Prompt]
+    _setOnClick('sspp-nega-prompt', e => {
+        root.classList.toggle("nega-prompt-hidden");
+    });
+    // [Props]
+    _setOnClick('sspp-config', e => {
+        root.classList.toggle("config-hidden");
+    });
+    // [Size selector]
+    _setOnClick('sspp-size', e => {
+        panel.classList.toggle("size-select");
+    });
+    _setOnClick('sspp-clip', e => {
+        panel.classList.toggle("clip-select");
+    })
+
+    // [Previous word]
+    _setOnClick('sspp-prevword', e => {
+        _sspp_selectPrevWord(panel.classList.contains("word-select"));
+    });
+    // [Current word]
+    _setOnClick('sspp-currword', e => {
+        sspp_selectWord(panel.classList.contains("word-select"));
+        panel.classList.toggle("word-select");
+    });
+    // [Next word]
+    _setOnClick('sspp-nextword', e => {
+        _sspp_selectNextWord(panel.classList.contains("word-select"));
+    });
+    // [Emphasize]
+    _setOnClick('sspp-parentheses', e => {
+        _sspp_emphasize();
+    });
+    // [rate down]
+    _setOnClick('sspp-ratedown', e => {
+        _sspp_changerate(-0.1);
+    });
+    // [rate up]
+    _setOnClick('sspp-rateup', e => {
+        _sspp_changerate(0.1);
+    });
+
+    // [Generate]
+    _setOnClick('sspp-generate', e => {
+        const generateButton = document.getElementById('txt2img_generate');
+        generateButton.click();
+    });
+
+    root.appendChild(panel);
+    root.classList.add('config-hidden', 'nega-prompt-hidden');
+}
+
+let _sspp_currentTabName = '';
+function _addEventListener() {
+    document.getElementById('tabs').addEventListener("click", function(e) {
+        const btn = e.target.closest("button");
+        if (btn) {
+            _sspp_currentTabName = btn.textContent.trim();
+            _sspp_updateSizeDisplay();
+        }
+    });
+    _sspp_currentTabName = _currentTabName();
+}
 
 function _insertInteractiveWidget() {
-    // 1. viewportのmetaタグを取得
     const viewportMeta = document.querySelector('meta[name="viewport"]');
-    
     if (viewportMeta) {
-      // 2. 現在のcontent属性の値を取得
-      let content = viewportMeta.getAttribute('content');
-    
-      // 3. まだ設定が含まれていない場合のみ追加（重複防止）
-      if (!content.includes('interactive-widget')) {
-        // コンマ区切りで追加
-        viewportMeta.setAttribute('content', content + ', interactive-widget=resizes-content');
-      }
+        let content = viewportMeta.getAttribute('content');
+        if (!content.includes('interactive-widget')) {
+            viewportMeta.setAttribute('content', content + ', interactive-widget=resizes-content');
+        }
     }
 }
-
-
-// 現在選択されているタブの名前を取得する
-function _currentTab() {
-    return document.querySelector('#tabs button.selected').textContent.trim().toLowerCase();
-}
-
-// 現在のタブに対応するプロンプトテキストエリアを取得する
-function _promptTextArea() {
-    const tab = _currentTab();
-    if (tab === 'txt2img') {
-        return document.querySelector('#txt2img_prompt textarea');
-    } else if (tab === 'img2img') {
-        return document.querySelector('#img2img_prompt textarea');
-    }
-    return null;
-}
-
 
 // パネルにボタンを追加するユーティリティ関数
 function _setOnClick(id, onClick) {
     document.getElementById(id).addEventListener('click', onClick);
 }
 
+// 現在選択されているタブの名前を取得する
+function _currentTabName() {
+    return document.querySelector('#tabs button.selected').textContent.trim().toLowerCase();
+}
+
+function _promptArea() {
+    return document.querySelector(`#${_sspp_currentTabName}_prompt textarea`);
+}
+
+function _sizeInputs() {
+    if (_sspp_currentTabName !== 'txt2img' && _sspp_currentTabName !== 'img2img') return null;
+    return [
+        document.querySelector(`#${_sspp_currentTabName}_width input`),
+        document.querySelector(`#${_sspp_currentTabName}_height input`)
+    ];
+}
+
 
 // サイズ選択ボタンが押されたときの処理
 function sspp_setSize(width, height) {
-    const widthInput = document.querySelector('#txt2img_width input');
-    const heightInput = document.querySelector('#txt2img_height input');
-    widthInput.value = width;
-    heightInput.value = height;
-    widthInput.dispatchEvent(new Event('input', { bubbles: true }));
-    heightInput.dispatchEvent(new Event('input', { bubbles: true }));
+    const size = _sizeInputs();
+    if (!size) return;
+    size[0].value = width;
+    size[0].dispatchEvent(new Event('input', { bubbles: true }));
+    size[1].value = height;
+    size[1].dispatchEvent(new Event('input', { bubbles: true }));
     document.getElementById('sd-smartphone-plus-panel').classList.remove("size-select");
-    sspp_updateSizeDisplay();
+    _sspp_updateSizeDisplay();
 }
 
 // サイズ表示を更新する
-function sspp_updateSizeDisplay() {
-    const widthInput = document.querySelector('#txt2img_width input');
-    const heightInput = document.querySelector('#txt2img_height input');
+function _sspp_updateSizeDisplay() {
+    const size = _sizeInputs();
+    if (!size) return;
     const sizeLabel = document.querySelector('#sspp-size>span.sspp-button-label');
-    sizeLabel.textContent = `${widthInput.value}x${heightInput.value}`;
+    sizeLabel.textContent = `${size[0].value}x${size[1].value}`;
 }
 
 
 // テキストエリア内の現在の単語を選択/解除する
 function sspp_selectWord(hold) {
-    const textArea = _promptTextArea();
-    if (!textArea) return;
-    if (hold) _sspp_unselectWord(textArea);
-    else _sspp_selectCurrentWord(textArea);
+    if (hold) _sspp_unselectWord();
+    else _sspp_selectCurrentWord();
 }
-function _sspp_selectCurrentWord(textArea) {
+function _sspp_selectCurrentWord() {
+    const textArea = _promptArea();
+    if (!textArea) return;
     const text = textArea.value;
     let start = textArea.selectionStart;
     while (start > 0 && !/\s/.test(text[start - 1])) start--;
@@ -133,14 +150,18 @@ function _sspp_selectCurrentWord(textArea) {
     textArea.setSelectionRange(start, end);
     textArea.focus();
 }
-function _sspp_unselectWord(textArea) {
+function _sspp_unselectWord() {
+    const textArea = _promptArea();
+    if (!textArea) return;
     const pos = textArea.selectionEnd;
     textArea.setSelectionRange(pos, pos);
     textArea.focus();
 }
 
 // テキストエリア内の前の単語を選択する
-function _sspp_selectPrevWord(textArea, hold) {
+function _sspp_selectPrevWord(hold) {
+    const textArea = _promptArea();
+    if (!textArea) return;
     _sspp_selectCurrentWord(textArea);
     const text = textArea.value;
     let end = textArea.selectionStart;
@@ -154,7 +175,9 @@ function _sspp_selectPrevWord(textArea, hold) {
 }
 
 // テキストエリア内の次の単語を選択する
-function _sspp_selectNextWord(textArea, hold) {
+function _sspp_selectNextWord(hold) {
+    const textArea = _promptArea();
+    if (!textArea) return;
     _sspp_selectCurrentWord(textArea);
     const text = textArea.value;
     let start = textArea.selectionEnd;
@@ -166,21 +189,27 @@ function _sspp_selectNextWord(textArea, hold) {
     textArea.focus();
 }
 
-function _sspp_changerate(textArea, rateGain) {
+// ":n)" のn値を変更
+function _sspp_changerate(rateGain) {
+    const textArea = _promptArea();
+    if (!textArea) return;
     _sspp_selectCurrentWord(textArea);
     const text = textArea.value;
     const before = text.substring(0, textArea.selectionStart);
     const after = text.substring(textArea.selectionStart);
     const newAfter = after.replace(/(:\s*([\d.]+))?\s*\)/, (m, p1, p2) => {
         const rate = (p2 ? (parseFloat(p2) || 0) : 1.1) + rateGain;
-        return `:${(rate < 0) ? 0 : rate.toFixed(2)})`;
+        return `:${(rate < 0) ? 0 : rate.toFixed(1)})`;
     });
     textArea.value = before + newAfter;
     textArea.dispatchEvent(new Event('input', { bubbles: true }));
     textArea.setSelectionRange(before.length, before.length);
 }
 
-function _sspp_emphasize(textArea) {
+// "()"で囲う
+function _sspp_emphasize() {
+    const textArea = _promptArea();
+    if (!textArea) return;
     _sspp_selectCurrentWord(textArea);
     const text = textArea.value;
     const before = text.substring(0, textArea.selectionStart);
@@ -197,6 +226,15 @@ function _sspp_emphasize(textArea) {
     textArea.setSelectionRange(newBefore.length, newBefore.length + newContent.length);
 }
 
+const clipboard = []
+function sspp_setClip() {
+    const textArea = _promptArea();
+    clipboard.push(textArea.value);
+}
+function _updateClipSelector() {
+    
+}
+
 
 // CSSのインジェクション/解除を切り替える
 function _toggleResponsiveCSS() {
@@ -209,7 +247,7 @@ function _toggleResponsiveCSS() {
         link.id = cssID;
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'file=extensions/sd-webui-smartphone-plus/responsive.css';
+        link.href = 'file=extensions/sd-webui-smartphone-plus/responsive.css?n='+((Math.random()*10000)&0);
         document.head.appendChild(link);
         return true
     } else {

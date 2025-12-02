@@ -6,7 +6,7 @@ def on_ui_tabs():
         gr.Markdown("## Smartphone Plus")
         gr.Markdown("Customize WebUI for Smartphone. Available only when the client width < 768px.")
         gr.HTML("""
-<div id="sd-smartphone-plus-prompt-helper" class="sspp-panel">
+<div id="sd-smartphone-plus-panel" class="sspp-panel">
     <div class="sspp-panel-column">
         <button id="sspp-generate" class="helper">Generate</button>
     </div>
@@ -15,11 +15,9 @@ def on_ui_tabs():
         <button id="sspp-currword" class="helper">select</button>
         <button id="sspp-nextword" class="helper">next</button>
         <button id="sspp-parentheses" class="helper">emph</button>
-        <button id="sspp-ratedown" class="helper">-0.05</button>
-        <button id="sspp-rateup"   class="helper">+0.05</button>
+        <button id="sspp-ratedown" class="helper">-0.1</button>
+        <button id="sspp-rateup"   class="helper">+0.1</button>
     </div>
-</div>
-<div id="sd-smartphone-plus-panel" class="sspp-panel">
     <div class="sspp-panel-column">
         <button id="sspp-inject-css" class="">
             <span class="sspp-button-label-off">InjectCSS</span>
@@ -35,13 +33,21 @@ def on_ui_tabs():
             <span class="sspp-button-label">Size</span>
         </button>
         <div id="sspp-size-selector" class="selector">
-            <button class="selector-item" onclick="sspp_setSize(1440, 810)">1440x810 (16z:9)</button>
+            <button class="selector-item" onclick="sspp_setSize(1440, 810)">1440x810 (16:9)</button>
             <button class="selector-item" onclick="sspp_setSize(1440, 960)">1440x960 (3:2)</button>
             <button class="selector-item" onclick="sspp_setSize(1440, 1080)">1440x1080 (4:3)</button>
             <button class="selector-item" onclick="sspp_setSize(1280, 1280)">1280x1280 (1:1)</button>
             <button class="selector-item" onclick="sspp_setSize(1080, 1440)">1080x1440 (3:4)</button>
             <button class="selector-item" onclick="sspp_setSize(960, 1440)">960x1440 (2:3)</button>
             <button class="selector-item" onclick="sspp_setSize(810, 1440)">810x1440 (9:16)</button>
+        </div>
+        <button id="sspp-clip" class="operator">
+            <span class="sspp-button-label">Clip</span>
+        </button>
+        <div id="sspp-clip-selector" class="selector">
+            <div class="selector-item" onclick="sspp_setSize(1440, 810)">...
+            </div>
+            <button class="selector-item" onclick="sspp_setClip()">+</button>
         </div>
     </div>
 </div>
