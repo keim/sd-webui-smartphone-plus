@@ -1,83 +1,96 @@
 // 画面上部のInjectパネルの表示/非表示を切り替える
 function insertPanel() {
     _setupMenuButtons();
-    _insertInteractiveWidget();
     _addEventListener();
+    _insertInteractiveWidget();
     _sspp_updateSizeDisplay();
     console.log("Responsive design CSS injector has been loaded.");
 }
 
+const _sspp_tabNames = [];
+let _sspp_currentTabName = '';
+
 function _setupMenuButtons() {
+    // パネルにボタンを追加するユーティリティ関数
+    const onclick = (id, onClick) => {
+        document.getElementById(id).addEventListener('click', onClick);
+    }
+
     const panel = document.getElementById('sd-smartphone-plus-panel');
     const root = document.getElementById('tabs').parentNode;
     
     // CSS Injection ボタン
-    _setOnClick('sspp-inject-css', () => {
-        root.classList.toggle('sspp-opened', _toggleResponsiveCSS());
+    onclick('sspp-inject-css', () => {
+        root.classList.toggle('sspp-opened', _sspp_toggleResponsiveCSS());
     });
     
     // [Negative Prompt]
-    _setOnClick('sspp-nega-prompt', e => {
+    onclick('sspp-nega-prompt', e => {
         root.classList.toggle("nega-prompt-hidden");
     });
     // [Props]
-    _setOnClick('sspp-config', e => {
+    onclick('sspp-config', e => {
         root.classList.toggle("config-hidden");
     });
     // [Size selector]
-    _setOnClick('sspp-size', e => {
+    onclick('sspp-size', e => {
         panel.classList.toggle("size-select");
     });
-    _setOnClick('sspp-clip', e => {
+    // [Clipboard selector]
+    onclick('sspp-clip', e => {
         panel.classList.toggle("clip-select");
     })
 
     // [Previous word]
-    _setOnClick('sspp-prevword', e => {
+    onclick('sspp-prevword', e => {
         _sspp_selectPrevWord(panel.classList.contains("word-select"));
     });
     // [Current word]
-    _setOnClick('sspp-currword', e => {
+    onclick('sspp-currword', e => {
         sspp_selectWord(panel.classList.contains("word-select"));
         panel.classList.toggle("word-select");
     });
     // [Next word]
-    _setOnClick('sspp-nextword', e => {
+    onclick('sspp-nextword', e => {
         _sspp_selectNextWord(panel.classList.contains("word-select"));
     });
     // [Emphasize]
-    _setOnClick('sspp-parentheses', e => {
+    onclick('sspp-parentheses', e => {
         _sspp_emphasize();
     });
     // [rate down]
-    _setOnClick('sspp-ratedown', e => {
+    onclick('sspp-ratedown', e => {
         _sspp_changerate(-0.1);
     });
     // [rate up]
-    _setOnClick('sspp-rateup', e => {
+    onclick('sspp-rateup', e => {
         _sspp_changerate(0.1);
     });
 
     // [Generate]
-    _setOnClick('sspp-generate', e => {
-        const generateButton = document.getElementById('txt2img_generate');
-        generateButton.click();
+    onclick('sspp-generate', e => {
+        const generateButton = _generateButton();
+        if (generateButton) generateButton.click();
     });
 
     root.appendChild(panel);
     root.classList.add('config-hidden', 'nega-prompt-hidden');
 }
 
-let _sspp_currentTabName = '';
 function _addEventListener() {
-    document.getElementById('tabs').addEventListener("click", function(e) {
-        const btn = e.target.closest("button");
-        if (btn) {
-            _sspp_currentTabName = btn.textContent.trim();
-            _sspp_updateSizeDisplay();
-        }
-    });
+    const tabButtons = document.querySelectorAll('#tabs>.tab-nav>button');
+    tabButtons.forEach(btn => _sspp_tabNames.push(btn.textContent.trim().toLowerCase()));
     _sspp_currentTabName = _currentTabName();
+
+    document.getElementById('tabs').addEventListener("click", e => {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        const tabName = btn.textContent.trim().toLowerCase();
+        if (!_sspp_tabNames.includes(tabName)) return;
+        console.log(`Tab changed to: ${tabName}`);
+        _sspp_currentTabName = tabName;
+        _sspp_updateSizeDisplay();
+    });
 }
 
 function _insertInteractiveWidget() {
@@ -90,10 +103,7 @@ function _insertInteractiveWidget() {
     }
 }
 
-// パネルにボタンを追加するユーティリティ関数
-function _setOnClick(id, onClick) {
-    document.getElementById(id).addEventListener('click', onClick);
-}
+
 
 // 現在選択されているタブの名前を取得する
 function _currentTabName() {
@@ -101,6 +111,7 @@ function _currentTabName() {
 }
 
 function _promptArea() {
+    if (_sspp_currentTabName !== 'txt2img' && _sspp_currentTabName !== 'img2img') return null;
     return document.querySelector(`#${_sspp_currentTabName}_prompt textarea`);
 }
 
@@ -110,6 +121,11 @@ function _sizeInputs() {
         document.querySelector(`#${_sspp_currentTabName}_width input`),
         document.querySelector(`#${_sspp_currentTabName}_height input`)
     ];
+}
+
+function _generateButton() {
+    if (_sspp_currentTabName !== 'txt2img' && _sspp_currentTabName !== 'img2img') return null;
+    return document.getElementById(`${_sspp_currentTabName}_generate`);
 }
 
 
@@ -236,8 +252,11 @@ function _updateClipSelector() {
 }
 
 
+
+
+
 // CSSのインジェクション/解除を切り替える
-function _toggleResponsiveCSS() {
+function _sspp_toggleResponsiveCSS() {
     const cssID = 'responsive-design-css';
     const existingLink = document.getElementById(cssID);
     
@@ -247,7 +266,7 @@ function _toggleResponsiveCSS() {
         link.id = cssID;
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'file=extensions/sd-webui-smartphone-plus/responsive.css?n='+((Math.random()*10000)&0);
+        link.href = 'file=extensions/sd-webui-smartphone-plus/responsive.css?n='+((Math.random()*10000)>>0);
         document.head.appendChild(link);
         return true
     } else {

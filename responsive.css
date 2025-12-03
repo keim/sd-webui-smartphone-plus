@@ -27,7 +27,8 @@
 #img2img_prompt textarea {
     height: 12rem !important;
 }
-#txt2img_generate {
+#txt2img_generate_box,
+#img2img_generate_box {
     display: none !important;
 }
 #sspp-generate {
