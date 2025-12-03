@@ -37,24 +37,27 @@ def on_ui_tabs():
         </button>
         <div id="sspp-size-selector" class="selector">
             <div class="selector-item" index="1">
-                <button class="selector-item-label" onclick="sspp_selectSize" />
-                <button class="selector-item-button" onclick="sspp_removeSize" />
+                <button class="selector-item-label" onclick="sspp_selectSize(this)" />
+                <button class="sspp-close selector-item-button" onclick="sspp_removeSize(this)" />
             </div>
-            <div class="selector-item">
+            <div class="selector-item" id="sspp-size-new-item">
                 <input type="text" placeholder="name"/>
                 <input type="number" min="64" max="2048" step="32" placeholder="width"/>
                 <input type="number" min="64" max="2048" step="32" placeholder="height"/>
-                <button id="sspp-size-register" class="selector-item-button" onclick="sspp_newSize"/>
+                <button id="sspp-size-register" class="selector-item-button" onclick="sspp_newSize(this)"/>
             </div>
-            <div class="sspp-selector-background" onclick="sspp_closeSelector"></div>
+            <div class="sspp-selector-background" onclick="sspp_closeSelector(this)"></div>
         </div>
         <div id="sspp-clip-selector" class="selector">
             <div class="selector-item" index="1">
-                <button class="selector-item-label" onclick="sspp_selectClip" />
-                <button class="selector-item-button" onclick="sspp_removeClip" />
+                <button class="selector-item-label" onclick="sspp_selectClip(this)" />
+                <button class="sspp-close selector-item-button" onclick="sspp_removeClip(this)" />
             </div>
-            <button class="selector-item" onclick="sspp_newClip">+</button>
-            <div class="sspp-selector-background" onclick="sspp_closeSelector"></div>
+            <div class="selector-item" id="sspp-clip-new-item">
+                <input type="text" placeholder="name"/>
+                <button id="sspp-size-register" class="selector-item-button" onclick="sspp_newClip(this)"/>
+            </div>
+            <div class="sspp-selector-background" onclick="sspp_closeSelector(this)"></div>
         </div>
     </div>
 </div>
