@@ -94,9 +94,16 @@
 .sspp-panel .selector-item input[type=text] {
     flex: 2 2 0;
 }
+.sspp-panel .selector-item .selector-item-label {
+    height: 2rem;
+    flex: 1 1 0;
+    border-width: 0;
+    font-size: 1rem;
+    padding: 0.5rem 0.6rem;
+}
 .sspp-panel .selector-item .selector-item-button {
-    height: 1.4rem;
-    flex: 0 0 1.4rem;
+    height: 2rem;
+    flex: 0 0 2rem;
     border-width: 0;
     background-position: center;
 }
@@ -140,10 +147,10 @@
 #sspp-size-register {
     background-image: url('./svg/plus.svg');
 }
-
-.sspp-size-close {
+.sspp-close.selector-item-button {
     background-image: url('./svg/close.svg');
 }
+
 #sspp-generate {
     padding:0.6rem 0.6rem;
     font-size: 1.2rem;
