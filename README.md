@@ -1,4 +1,4 @@
-# sd-webui-smartphone-plus
+# sd-webui-mobile-plus
 
 A Stable Diffusion WebUI extension that optimizes the interface for smartphone and mobile devices by injecting responsive CSS and providing mobile-friendly controls.
 
@@ -39,11 +39,11 @@ A dedicated control panel (SP+) with quick-access buttons for common operations:
 1. Goto 'Extentions' panel and select 'install from URL' tab:
 
 2. Input below url into 'URL for extension's git repository':
-   https://github.com/yourusername/sd-webui-smartphone-plus.git
+   https://github.com/keim/sd-webui-mobile-plus
 
 3. Restart the Stable Diffusion WebUI
 
-4. The extension will be available in the "SP+" tab
+4. The "injectCSS" button will be appeared in the bottom of the screen, when using mobile device.
 
 ## Usage
 

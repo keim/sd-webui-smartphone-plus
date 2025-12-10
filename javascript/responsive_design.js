@@ -1,6 +1,7 @@
 // 画面上部のInjectパネルの表示/非表示を切り替える
 function insertPanel() {
     _initialize();
+    _initWordDictionary();
     _setupMenuButtons();
     _addEventListener();
     _insertInteractiveWidget();
@@ -20,9 +21,12 @@ const sspp_clipList = [];
 let sspp_sizeSelectorItem = null;
 let sspp_clipSelectorItem = null;
 let geminiapi = null;
+const wordDictionary = {};
+
 
 // 初期化処理
 function _initialize() {
+    // サイズリストとクリップリストをローカルストレージから読み込む
     const sizeListJSON = localStorage.getItem('sspp_size_list');
     const clipListJSON = localStorage.getItem('sspp_clip_list');
     if (sizeListJSON) {
@@ -53,12 +57,28 @@ function _initialize() {
     if (sspp_sizeSelectorItem) sspp_sizeSelectorItem.remove();
     if (sspp_clipSelectorItem) sspp_clipSelectorItem.remove();
 
+    // Gemini API モジュールの動的インポート
     import("./modules/geminiapi.js").then(module => {
         geminiapi = module.geminiapi();
     }).catch(err => {
         console.error("Failed to load geminiapi module:", err);
     });
 }
+
+
+function _initWordDictionary() {
+    const promptHistoryBox = document.getElementById("sspp_prompt_history");
+    const promptHistory = JSON.parse(promptHistoryBox.querySelector("textarea, input").value);
+
+    promptHistory.forEach(entry => {
+        const words = entry.split(/[\s,()]+|:\s*[\d.]+\s*\)/).map(w=>w.trim().toLowerCase()).filter(w=>w!=='');
+        words.forEach((word, i) => {
+            if (word && !(word in wordDictionary)) wordDictionary[word] = [];
+            wordDictionary[word]
+        });
+    });
+}
+    
 
 // メニューボタンのセットアップ
 function _setupMenuButtons() {
@@ -364,26 +384,40 @@ function _sspp_updateSizeDisplay() {
 // テキストエリア内の現在の単語を選択/解除する
 class WordOperations {
     selectWord(hold) {
-        if (hold) this.unselectWord();
-        else this.selectCurrentWord();
+        if (hold) this._unselectWord();
+        else this._selectCurrentWord();
+    }
+
+    _matchWordAtPosition(text, position, directionFlag=0) {
+        const re = /[^\s,():]+|:\s*[\d.]+/g;
+        let prevStart = 0, prevEnd = 0;
+        for (let match; (match = re.exec(text)) !== null; ) {
+            const start = match.index;
+            const end = start + match[0].length;
+            if (position < end) {
+                if (start < position) return { start, end };
+                if (directionFlag < 0) return { start: prevStart, end: prevEnd };
+                if (directionFlag > 0) return { start, end };
+                return null;
+            }
+            prevStart = start;
+            prevEnd = end;
+        }
+        return (directionFlag < 0) ? { start: prevStart, end: prevEnd } : null;
     }
 
     _selectCurrentWord() {
         const textArea = _promptArea();
         if (!textArea) return;
-        const text = textArea.value;
-        let start = textArea.selectionStart;
-        while (start > 0 && !/\s/.test(text[start - 1])) start--;
-        let end = textArea.selectionEnd;
-        while (end < text.length && !/\s/.test(text[end])) end++;
-        textArea.setSelectionRange(start, end);
+        const cursor = this._matchWordAtPosition(textArea.value, textArea.selectionStart);
+        if (cursor) textArea.setSelectionRange(cursor.start, cursor.end);
         textArea.focus();
     }
     
     _unselectWord() {
         const textArea = _promptArea();
         if (!textArea) return;
-        const pos = textArea.selectionEnd;
+        const pos = textArea.selectionStart;
         textArea.setSelectionRange(pos, pos);
         textArea.focus();
     }
@@ -391,63 +425,55 @@ class WordOperations {
     selectPrevWord(hold) {
         const textArea = _promptArea();
         if (!textArea) return;
-        this.selectCurrentWord();
-        const text = textArea.value;
-        let end = textArea.selectionStart;
-        if (end === 0) return;
-        end--;
-        while (end > 0 && /\s/.test(text[end - 1])) end--;
-        let start = end;
-        while (start > 0 && !/\s/.test(text[start - 1])) start--;
-        textArea.setSelectionRange(start, hold ? textArea.selectionEnd : end);
+        const cursor = this._matchWordAtPosition(textArea.value, textArea.selectionStart, -1);
+        if (cursor) textArea.setSelectionRange(cursor.start, hold ? textArea.selectionEnd : cursor.end);
         textArea.focus();
     }
     
     selectNextWord(hold) {
         const textArea = _promptArea();
         if (!textArea) return;
-        this.selectCurrentWord();
-        const text = textArea.value;
-        let start = textArea.selectionEnd;
-        if (start === text.length) return;
-        while (start < text.length && /\s/.test(text[start])) start++;
-        let end = start;
-        while (end < text.length && !/\s/.test(text[end])) end++;
-        textArea.setSelectionRange(hold ? textArea.selectionStart : start, end);
+        const cursor = this._matchWordAtPosition(textArea.value, textArea.selectionEnd, 1);
+        if (cursor) textArea.setSelectionRange(hold ? textArea.selectionStart : cursor.start, cursor.end);
         textArea.focus();
     }
 
     changerate(rateGain) {
         const textArea = _promptArea();
         if (!textArea) return;
-        this.selectCurrentWord();
+        this._selectCurrentWord();
         const text = textArea.value;
         const before = text.substring(0, textArea.selectionStart);
         const after = text.substring(textArea.selectionStart);
-        const newAfter = after.replace(/(:\s*([\d.]+))?\s*\)/, (m, p1, p2) => {
-            const rate = (p2 ? (parseFloat(p2) || 0) : 1.1) + rateGain;
-            return `:${(rate < 0) ? 0 : rate.toFixed(1)})`;
-        });
-        textArea.value = before + newAfter;
-        textArea.dispatchEvent(new Event('input', { bubbles: true }));
-        textArea.setSelectionRange(before.length, before.length);
+        const match = after.match(/:?(\s*)([\d.]+)?(\s*\))/);
+        if (match) {
+            const rate = (match[2] ? (parseFloat(match[2]) || 0) : 1.1) + rateGain;
+            const rateText = `:${match[1]}${(rate < 0) ? 0 : rate.toFixed(1)}`;
+            const newAfter = after.slice(0, match.index) + rateText + match[3] + after.slice(match.index + match[0].length);
+            textArea.value = before + newAfter;
+            textArea.dispatchEvent(new Event('input', { bubbles: true }));
+            const start = before.length + match.index;
+            textArea.setSelectionRange(start, start + rateText.length);
+            textArea.focus();
+        }
     }
 
     emphasize() {
         const textArea = _promptArea();
         if (!textArea) return;
-        this.selectCurrentWord();
+        this._selectCurrentWord();
         const text = textArea.value;
         const before = text.substring(0, textArea.selectionStart);
         const content = text.substring(textArea.selectionStart, textArea.selectionEnd);
         const after =  text.substring(textArea.selectionEnd);
-        const contentR = content.replaceAll(/[()]/g, '');
+        const contentR = content.replaceAll(/[()]|:\s*[\d.]+/g, '');
         const newBefore = before.replace(/^(.*)\((?!.*[)>])([^(]*)$/s, '$1$2');
         const newContent = (/^\([^<()>]*\)$/s.test(content)) ? contentR : `(${contentR})`;
         const newAfter  = after.replace(/^([^<(]*)\)(.*)$/s, '$1$2');
         textArea.value = newBefore + newContent + newAfter;
         textArea.dispatchEvent(new Event('input', { bubbles: true }));
         textArea.setSelectionRange(newBefore.length, newBefore.length + newContent.length);
+        textArea.focus();
     }
 }
 const sspp_wordOps = new WordOperations();
@@ -462,12 +488,11 @@ function _sspp_toggleResponsiveCSS() {
     const existingLink = document.getElementById(cssID);
     
     if (!existingLink) {
-        // CSSが注入されていない場合 → 注入する
         const link = document.createElement('link');
         link.id = cssID;
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'file=extensions/sd-webui-smartphone-plus/responsive.css?n='+((Math.random()*10000)>>0);
+        link.href = `file=extensions/sd-webui-mobile-plus/responsive.css?n=${(Math.random()*10000)>>0}`;
         document.head.appendChild(link);
         return true
     } else {
