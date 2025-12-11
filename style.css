@@ -23,6 +23,9 @@
     gap: 0.1rem;
     padding: 0.1rem 0rem;
 }
+.sspp-panel > .sspp-panel-column.hidden {
+    display: none;
+}
 .sspp-panel button {
     pointer-events: auto;
     position: relative;
@@ -151,9 +154,17 @@
     background-image: url('./svg/close.svg');
 }
 
+
 #sspp-generate {
     padding:0.6rem 0.6rem;
     font-size: 1.2rem;
+}
+#sspp-candidate {
+    min-height: 2rem;
+}
+#sspp-candidate button {
+    padding:0.3rem 0;
+    font-size: 1rem;
 }
 
 .sspp-panel button.helper,
